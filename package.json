@@ -1,0 +1,21 @@
+{
+  "name": "dsh-nacos-ai",
+  "version": "0.2.0",
+  "private": true,
+  "description": "DSH integration for Nacos AI AgentSpecs and Skills",
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "check": "pnpm --filter @dsh-nacos/ai check",
+    "test": "pnpm --filter @dsh-nacos/ai test",
+    "pack:plugin": "pnpm --filter @dsh-nacos/ai pack:offline"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "nacos",
+    "nacos-ai",
+    "agentspec",
+    "skill"
+  ],
+  "license": "Apache-2.0"
+}

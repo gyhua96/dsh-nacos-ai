@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nacos AgentSpec Presets</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, "Microsoft YaHei", sans-serif; background:#111827; color:#e5e7eb; }
+    body { margin:0; padding:20px; } header { display:flex; gap:12px; align-items:center; position:sticky; top:0; background:#111827; padding-bottom:14px; }
+    h1 { font-size:18px; margin:0 auto 0 0; } input { width:320px; max-width:46vw; background:#1f2937; color:#fff; border:1px solid #4b5563; border-radius:8px; padding:9px 12px; }
+    button { background:#2563eb; border:0; border-radius:8px; color:#fff; padding:9px 12px; cursor:pointer; } button:disabled { opacity:.55; cursor:wait; }
+    #status { color:#9ca3af; font-size:13px; margin:0 0 14px; } .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
+    article { background:#1f2937; border:1px solid #374151; border-radius:12px; padding:14px; min-height:145px; display:flex; flex-direction:column; gap:10px; }
+    h2 { font-size:15px; margin:0; overflow-wrap:anywhere; } p { margin:0; color:#cbd5e1; font-size:13px; line-height:1.5; white-space:pre-wrap; }
+    footer { display:flex; align-items:center; gap:8px; margin-top:auto; } .tag { color:#93c5fd; font-size:12px; } .error { color:#fca5a5; } .empty { color:#9ca3af; }
+  </style>
+</head>
+<body>
+  <header><h1>Nacos AgentSpec Presets</h1><input id="filter" placeholder="搜索名称或描述" /><button id="refresh">加载列表</button></header>
+  <p id="status">点击“加载列表”后才会请求 Nacos metadata；不会下载任何 preset 内容。</p>
+  <main id="list" class="grid"></main>
+  <script type="module">
+    const api = window.opener?.dshNacosPresetBrowser;
+    const list = document.querySelector('#list'); const status = document.querySelector('#status'); const filter = document.querySelector('#filter'); const refresh = document.querySelector('#refresh');
+    let items = [];
+    function render() { const q = filter.value.trim().toLowerCase(); const shown = items.filter(x => !q || `${x.name}\n${x.description}`.toLowerCase().includes(q)); list.replaceChildren(...shown.map(item => { const card=document.createElement('article'); card.innerHTML=`<h2>${escape(item.name)}</h2><p>${escape(item.description||'无描述')}</p><footer><span class="tag">${item.enabled&&item.onlineCount>0?'可下载':'不可用'}</span><button ${item.enabled&&item.onlineCount>0?'':'disabled'}>下载并用于新会话</button></footer>`; card.querySelector('button').onclick=()=>download(item); return card;})); if(!shown.length) list.innerHTML='<p class="empty">没有匹配的 AgentSpec。</p>'; }
+    async function load() { if(!api){ status.textContent='插件浏览器 API 未连接。请从 DSH Nacos Presets 入口打开此窗口。'; status.className='error'; return;} refresh.disabled=true; status.textContent='正在读取 Nacos metadata…'; try { items=(await api.list()).items; status.textContent=`已加载 ${items.length} 个 metadata；尚未下载任何 preset 内容。`; status.className=''; render(); } catch(e){status.textContent=e.message||String(e);status.className='error';} finally {refresh.disabled=false;} }
+    async function download(item) { status.textContent=`正在下载 ${item.name}…`; try { await api.download(item.id); status.textContent=`已下载 ${item.name}；正在创建新会话。`; await api.applyToNewSession(item.id); } catch(e) { status.textContent=e.message||String(e); status.className='error'; } }
+    function escape(s){const e=document.createElement('span');e.textContent=s??'';return e.innerHTML;}
+    filter.oninput=render; refresh.onclick=load;
+  </script>
+</body>
+</html>

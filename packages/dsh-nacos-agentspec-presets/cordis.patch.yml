@@ -1,0 +1,53 @@
+# Nacos AgentSpec synchronizer bundle.
+# The profile supplies environment-specific config in its own cordis.patch.yml.
+- insert:
+    - id: nacos-agentspec-presets
+      name: '@dsh-nacos/ai'
+      disabled: true
+      config:
+        # Set the server in Settings → Nacos after installation. Do not commit a
+        # real server URL, username, password, or token in this bundle.
+        serverUrl: ''
+        accessTokenEnv: NACOS_ACCESS_TOKEN
+        namespaceId: public
+        apiPlane: console
+        mirrorRoot: C:/Users/your-user/.dsh/runtime/nacos-agentspec-mirror
+        skillMarketRoot: C:/Users/your-user/.dsh/runtime/nacos-skill-market
+        timeoutMs: 10000
+        pageSize: 100
+        # All AgentSpecs default to this local broad tool profile. The Nacos
+        # server never supplies tools or permission configuration.
+        toolProfiles:
+          full-access:
+            - id: tool-pwsh
+              name: '@deepseek-ai/dsh-tool-pwsh'
+            - id: tool-fs
+              name: '@deepseek-ai/dsh-tool-fs'
+            - id: tool-fs-search
+              name: '@deepseek-ai/dsh-tool-fs-search'
+            - id: tool-jobs
+              name: '@deepseek-ai/dsh-tool-jobs'
+            - id: tool-ask-user
+              name: '@deepseek-ai/dsh-tool-ask-user'
+            - id: tool-todo
+              name: '@deepseek-ai/dsh-tool-todo'
+            - id: tool-web
+              name: '@deepseek-ai/dsh-tool-web'
+            - id: present
+              name: '@deepseek-ai/dsh-tool-present'
+        # Remote AgentSpecs can select only these locally audited MCP profiles.
+        # Never put credentials, arbitrary remote commands, or remote URLs in AgentSpec.
+        mcpProfiles: {}
+        # DSH-only consumption mappings. These are local deployment policy, not
+        # Nacos AgentSpec content. Nacos remains reusable by other consumers.
+        agentSpecMappings: {}
+        # Example local profile (enable only after your DSH profile supplies
+        # @deepseek-ai/dsh-mcp-client and credential-safe configuration):
+        # catalog:
+        #   - id: nacos-mcp-catalog
+        #     name: '@deepseek-ai/dsh-mcp-client'
+        #     config:
+        #       serverName: catalog
+        #       transport: streamable-http
+        #       url: https://mcp.example.internal/mcp
+        #       headers: {}
